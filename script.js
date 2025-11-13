@@ -1,11 +1,341 @@
 // ================================================
-// PROFESSIONAL PORTFOLIO - JAVASCRIPT WITH JQUERY
+// CRITICAL MOBILE FIXES
 // ================================================
 
-// Wait for DOM to be fully loaded
+// Prevent zoom on input focus (iOS fix)
+$('input, textarea, select').on('focus', function() {
+    $('meta[name=viewport]').attr('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+}).on('blur', function() {
+    $('meta[name=viewport]').attr('content', 'width=device-width, initial-scale=1.0');
+});
+
+// Fix iOS rubber band scrolling when menu is open
+function preventBodyScroll(enable) {
+    if (enable) {
+        $('body').css({
+            'overflow': 'hidden',
+            'position': 'fixed',
+            'width': '100%',
+            'height': '100%'
+        });
+    } else {
+        $('body').css({
+            'overflow': 'auto',
+            'position': 'relative',
+            'height': 'auto'
+        });
+    }
+}
+
+// ================================================
+// MOBILE MENU ENHANCED
+// ================================================
+
+function initMobileMenu() {
+    const $hamburger = $('#hamburger');
+    const $navMenu = $('#navMenu');
+    const $navLinks = $('.nav-link');
+    
+    // Ensure hamburger exists
+    if ($hamburger.length === 0) {
+        console.error('Hamburger menu not found');
+        return;
+    }
+    
+    // Toggle mobile menu
+    $hamburger.off('click').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const isActive = $(this).hasClass('active');
+        
+        $(this).toggleClass('active');
+        $navMenu.toggleClass('active');
+        
+        // Prevent body scroll when menu is open
+        preventBodyScroll(!isActive);
+        
+        console.log('Menu toggled:', !isActive);
+    });
+    
+    // Close menu when clicking on a link
+    $navLinks.off('click').on('click', function(e) {
+        console.log('Nav link clicked');
+        $hamburger.removeClass('active');
+        $navMenu.removeClass('active');
+        preventBodyScroll(false);
+    });
+    
+    // Close menu when clicking outside
+    $(document).off('click.menu').on('click.menu', function(e) {
+        if (!$(e.target).closest('.nav-menu, #hamburger').length) {
+            if ($navMenu.hasClass('active')) {
+                $hamburger.removeClass('active');
+                $navMenu.removeClass('active');
+                preventBodyScroll(false);
+            }
+        }
+    });
+    
+    // Handle window resize
+    $(window).on('resize', function() {
+        if ($(window).width() > 768) {
+            $hamburger.removeClass('active');
+            $navMenu.removeClass('active');
+            preventBodyScroll(false);
+        }
+    });
+}
+
+// ================================================
+// FIX SWIPER FOR MOBILE
+// ================================================
+
+function initSwiper() {
+    if ($('.projectsSwiper').length === 0) {
+        console.log('Swiper container not found');
+        return;
+    }
+    
+    const projectsSwiper = new Swiper('.projectsSwiper', {
+        loop: true,
+        slidesPerView: 1,
+        spaceBetween: 20,
+        centeredSlides: true,
+        
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+            dynamicBullets: true
+        },
+        
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        
+        autoplay: {
+            delay: 5000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+        },
+        
+        breakpoints: {
+            320: {
+                slidesPerView: 1,
+                spaceBetween: 15
+            },
+            480: {
+                slidesPerView: 1,
+                spaceBetween: 20
+            },
+            768: {
+                slidesPerView: 2,
+                spaceBetween: 25
+            },
+            1024: {
+                slidesPerView: 2,
+                spaceBetween: 30
+            },
+            1200: {
+                slidesPerView: 3,
+                spaceBetween: 30
+            }
+        },
+        
+        speed: 600,
+        effect: 'slide',
+        
+        keyboard: {
+            enabled: true,
+            onlyInViewport: true
+        },
+        
+        // Better touch settings
+        touchRatio: 1,
+        touchAngle: 45,
+        grabCursor: true,
+        touchStartPreventDefault: false,
+        touchMoveStopPropagation: false,
+        
+        // Accessibility
+        a11y: {
+            enabled: true
+        }
+    });
+    
+    console.log('Swiper initialized');
+    
+    return projectsSwiper;
+}
+
+// ================================================
+// FIX SMOOTH SCROLL FOR MOBILE
+// ================================================
+
+function initSmoothScroll() {
+    $('a[href^="#"]').off('click').on('click', function(e) {
+        e.preventDefault();
+        
+        const href = $(this).attr('href');
+        const target = $(href);
+        
+        if (target.length) {
+            // Close mobile menu if open
+            $('#hamburger').removeClass('active');
+            $('#navMenu').removeClass('active');
+            preventBodyScroll(false);
+            
+            // Calculate offset for mobile
+            const offset = $(window).width() < 768 ? 70 : 80;
+            
+            $('html, body').animate({
+                scrollTop: target.offset().top - offset
+            }, 800, 'swing');
+        }
+    });
+}
+
+// ================================================
+// FIX BUTTONS FOR MOBILE
+// ================================================
+
+function fixMobileButtons() {
+    // Make all buttons more tappable
+    $('.btn, button, .nav-link, a').css({
+        'min-height': '44px',
+        'min-width': '44px',
+        'touch-action': 'manipulation'
+    });
+    
+    // Prevent double-tap zoom on buttons
+    $('.btn, button').on('touchend', function(e) {
+        e.preventDefault();
+        $(this).trigger('click');
+    });
+}
+
+// ================================================
+// FIX CONTACT FORM FOR MOBILE
+// ================================================
+
+function initContactForm() {
+    const $sendBtn = $('#sendMessage');
+    
+    if ($sendBtn.length === 0) {
+        console.log('Send button not found');
+        return;
+    }
+    
+    $sendBtn.off('click').on('click', function(e) {
+        e.preventDefault();
+        console.log('Send button clicked');
+        
+        const $btn = $(this);
+        const name = $('#contactName').val().trim();
+        const email = $('#contactEmail').val().trim();
+        const subject = $('#contactSubject').val().trim();
+        const message = $('#contactMessage').val().trim();
+        
+        // Validate
+        if (!name || !email || !subject || !message) {
+            showNotification('Please fill in all fields', 'error');
+            return;
+        }
+        
+        if (!isValidEmail(email)) {
+            showNotification('Please enter a valid email address', 'error');
+            return;
+        }
+        
+        // Show loading
+        $btn.prop('disabled', true)
+            .html('<i class="fas fa-spinner fa-spin"></i> Sending...');
+        
+        // Simulate sending
+        setTimeout(function() {
+            // Hide form, show success
+            $('#contactForm').fadeOut(400, function() {
+                $('#formSuccess').fadeIn(400);
+            });
+            
+            // Reset button
+            $btn.prop('disabled', false)
+                .html('<i class="fas fa-paper-plane"></i> Send Message');
+            
+            // Clear form
+            $('#contactName, #contactEmail, #contactSubject, #contactMessage').val('');
+            
+            showNotification('Message sent successfully!', 'success');
+        }, 2000);
+    });
+}
+
+// ================================================
+// FIX NEWSLETTER FOR MOBILE
+// ================================================
+
+function initNewsletter() {
+    const $subscribeBtn = $('#subscribeBtn');
+    
+    if ($subscribeBtn.length === 0) {
+        console.log('Subscribe button not found');
+        return;
+    }
+    
+    $subscribeBtn.off('click').on('click', function(e) {
+        e.preventDefault();
+        console.log('Subscribe button clicked');
+        
+        const $btn = $(this);
+        const email = $('#newsletterEmail').val().trim();
+        
+        if (!email) {
+            showNotification('Please enter your email', 'error');
+            return;
+        }
+        
+        if (!isValidEmail(email)) {
+            showNotification('Please enter a valid email', 'error');
+            return;
+        }
+        
+        $btn.prop('disabled', true)
+            .html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        setTimeout(function() {
+            $('#newsletterEmail').val('');
+            $btn.prop('disabled', false)
+                .html('<i class="fas fa-envelope"></i> Subscribe');
+            showNotification('Successfully subscribed!', 'success');
+        }, 1500);
+    });
+}
+
+// ================================================
+// INITIALIZE EVERYTHING ON LOAD
+// ================================================
+
 $(document).ready(function() {
-    console.log('✅ jQuery loaded successfully');
-    initializePortfolio();
+    console.log('✅ Document ready - Initializing...');
+    
+    // Wait a bit for everything to load
+    setTimeout(function() {
+        initializePortfolio();
+        fixMobileButtons();
+        
+        console.log('✅ Portfolio initialized');
+        console.log('Window width:', $(window).width());
+        console.log('Hamburger exists:', $('#hamburger').length > 0);
+        console.log('Nav menu exists:', $('#navMenu').length > 0);
+    }, 100);
+});
+
+// Reinitialize on page show (for back button)
+$(window).on('pageshow', function(event) {
+    if (event.persisted) {
+        initializePortfolio();
+    }
 });
 
 // ================================================
