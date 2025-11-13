@@ -1,6 +1,635 @@
 // ================================================
-// PROFESSIONAL PORTFOLIO - JAVASCRIPT
+// PROFESSIONAL PORTFOLIO - JAVASCRIPT WITH JQUERY
 // ================================================
+
+// Wait for DOM to be fully loaded
+$(document).ready(function() {
+    console.log('✅ jQuery loaded successfully');
+    initializePortfolio();
+});
+
+// ================================================
+// INITIALIZE ALL FUNCTIONS
+// ================================================
+
+function initializePortfolio() {
+    // Initialize libraries
+    initAOS();
+    initSwiper();
+    initTyped();
+    
+    // Initialize navigation
+    initNavigation();
+    initMobileMenu();
+    
+    // Initialize scroll features
+    initScrollProgress();
+    initBackToTop();
+    initSmoothScroll();
+    initActiveNavLinks();
+    
+    // Initialize animations
+    initCounters();
+    initSkillBars();
+    
+    // Initialize forms
+    initContactForm();
+    initNewsletter();
+    
+    // Initialize other features
+    initCodeCopy();
+    
+    console.log('✅ All features initialized');
+}
+
+// ================================================
+// 1. INITIALIZE AOS (Animate On Scroll)
+// ================================================
+
+function initAOS() {
+    AOS.init({
+        duration: 1000,
+        easing: 'ease-in-out',
+        once: true,
+        mirror: false,
+        offset: 100,
+        delay: 0,
+        anchorPlacement: 'top-bottom',
+        // Mobile settings
+        disable: function() {
+            return $(window).width() < 768 ? false : false;
+        }
+    });
+    
+    // Refresh AOS on window resize
+    $(window).on('resize', function() {
+        AOS.refresh();
+    });
+}
+
+// ================================================
+// 2. INITIALIZE SWIPER.JS (Project Slider)
+// ================================================
+
+function initSwiper() {
+    const projectsSwiper = new Swiper('.projectsSwiper', {
+        loop: true,
+        slidesPerView: 1,
+        spaceBetween: 30,
+        
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+            dynamicBullets: true
+        },
+        
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        
+        autoplay: {
+            delay: 5000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+        },
+        
+        // Better responsive breakpoints
+        breakpoints: {
+            320: {
+                slidesPerView: 1,
+                spaceBetween: 15
+            },
+            576: {
+                slidesPerView: 1,
+                spaceBetween: 20
+            },
+            768: {
+                slidesPerView: 2,
+                spaceBetween: 25
+            },
+            992: {
+                slidesPerView: 2,
+                spaceBetween: 30
+            },
+            1200: {
+                slidesPerView: 3,
+                spaceBetween: 30
+            }
+        },
+        
+        effect: 'slide',
+        speed: 600,
+        
+        keyboard: {
+            enabled: true,
+        },
+        
+        mousewheel: {
+            forceToAxis: true,
+        },
+        
+        // Touch settings for better mobile experience
+        touchRatio: 1,
+        touchAngle: 45,
+        grabCursor: true
+    });
+    
+    // Handle visibility change
+    $(document).on('visibilitychange', function() {
+        if (document.hidden) {
+            projectsSwiper.autoplay.stop();
+        } else {
+            projectsSwiper.autoplay.start();
+        }
+    });
+}
+
+// ================================================
+// 3. TYPED.JS - TYPING ANIMATION
+// ================================================
+
+function initTyped() {
+    if ($('.typing-text').length) {
+        const typed = new Typed('.typing-text', {
+            strings: [
+                'HTML & CSS',
+                'JavaScript',
+                'Responsive Design',
+                'API Integration',
+                'Modern Web Apps'
+            ],
+            typeSpeed: 80,
+            backSpeed: 50,
+            backDelay: 2000,
+            loop: true,
+            showCursor: true,
+            cursorChar: '|'
+        });
+    }
+}
+
+// ================================================
+// 4. NAVIGATION - SCROLL & MOBILE MENU
+// ================================================
+
+function initNavigation() {
+    const $navbar = $('#navbar');
+    
+    // Sticky navbar on scroll using jQuery
+    $(window).on('scroll', function() {
+        if ($(this).scrollTop() > 100) {
+            $navbar.addClass('scrolled');
+        } else {
+            $navbar.removeClass('scrolled');
+        }
+    });
+}
+
+function initMobileMenu() {
+    const $hamburger = $('#hamburger');
+    const $navMenu = $('#navMenu');
+    const $navLinks = $('.nav-link');
+    
+    // Toggle mobile menu with jQuery animation
+    $hamburger.on('click', function() {
+        $(this).toggleClass('active');
+        $navMenu.toggleClass('active');
+        
+        // Prevent body scroll when menu is open
+        if ($navMenu.hasClass('active')) {
+            $('body').css('overflow', 'hidden');
+        } else {
+            $('body').css('overflow', 'auto');
+        }
+    });
+    
+    // Close menu when clicking on a link
+    $navLinks.on('click', function() {
+        $hamburger.removeClass('active');
+        $navMenu.removeClass('active');
+        $('body').css('overflow', 'auto');
+    });
+    
+    // Close menu when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.nav-menu, #hamburger').length) {
+            $hamburger.removeClass('active');
+            $navMenu.removeClass('active');
+            $('body').css('overflow', 'auto');
+        }
+    });
+}
+
+// ================================================
+// 5. SCROLL PROGRESS BAR
+// ================================================
+
+function initScrollProgress() {
+    const $progressBar = $('#progressBar');
+    
+    $(window).on('scroll', function() {
+        const windowHeight = $(document).height() - $(window).height();
+        const scrolled = ($(window).scrollTop() / windowHeight) * 100;
+        $progressBar.css('width', scrolled + '%');
+    });
+}
+
+// ================================================
+// 6. COUNTER ANIMATION (Using jQuery)
+// ================================================
+
+function initCounters() {
+    const $counters = $('.counter');
+    let animated = false;
+    
+    $(window).on('scroll', function() {
+        if (!animated && isInViewport($counters.first())) {
+            animated = true;
+            
+            $counters.each(function() {
+                const $this = $(this);
+                const target = parseInt($this.data('target'));
+                
+                $({ count: 0 }).animate({ count: target }, {
+                    duration: 2000,
+                    easing: 'swing',
+                    step: function() {
+                        $this.text(Math.ceil(this.count));
+                    },
+                    complete: function() {
+                        $this.text(target);
+                    }
+                });
+            });
+        }
+    });
+}
+
+// ================================================
+// 7. SKILL PROGRESS BARS (Using jQuery)
+// ================================================
+
+function initSkillBars() {
+    const $skillBars = $('.skill-progress');
+    let skillsAnimated = false;
+    
+    $(window).on('scroll', function() {
+        if (!skillsAnimated && isInViewport($skillBars.first())) {
+            skillsAnimated = true;
+            
+            $skillBars.each(function() {
+                const $this = $(this);
+                const progress = $this.data('progress');
+                
+                $this.animate({
+                    width: progress + '%'
+                }, 1500, 'swing');
+            });
+        }
+    });
+}
+
+// ================================================
+// 8. SMOOTH SCROLL (jQuery)
+// ================================================
+
+function initSmoothScroll() {
+    $('a[href^="#"]').on('click', function(e) {
+        e.preventDefault();
+        
+        const target = $(this.getAttribute('href'));
+        
+        if (target.length) {
+            $('html, body').animate({
+                scrollTop: target.offset().top - 80
+            }, 800, 'swing');
+        }
+    });
+}
+
+// ================================================
+// 9. BACK TO TOP BUTTON (jQuery)
+// ================================================
+
+function initBackToTop() {
+    const $backToTop = $('#backToTop');
+    
+    $(window).on('scroll', function() {
+        if ($(this).scrollTop() > 500) {
+            $backToTop.fadeIn().addClass('show');
+        } else {
+            $backToTop.fadeOut().removeClass('show');
+        }
+    });
+    
+    $backToTop.on('click', function() {
+        $('html, body').animate({
+            scrollTop: 0
+        }, 800, 'swing');
+    });
+}
+
+// ================================================
+// 10. ACTIVE NAVIGATION LINKS
+// ================================================
+
+function initActiveNavLinks() {
+    const $sections = $('section[id]');
+    const $navLinks = $('.nav-link');
+    
+    $(window).on('scroll', function() {
+        const scrollY = $(this).scrollTop();
+        
+        $sections.each(function() {
+            const $section = $(this);
+            const sectionHeight = $section.outerHeight();
+            const sectionTop = $section.offset().top - 100;
+            const sectionId = $section.attr('id');
+            
+            if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                $navLinks.removeClass('active');
+                $(`.nav-link[href="#${sectionId}"]`).addClass('active');
+            }
+        });
+    });
+}
+
+// ================================================
+// 11. CONTACT FORM (jQuery Enhanced)
+// ================================================
+
+function initContactForm() {
+    $('#sendMessage').on('click', function(e) {
+        e.preventDefault();
+        
+        const $btn = $(this);
+        const name = $('#contactName').val().trim();
+        const email = $('#contactEmail').val().trim();
+        const subject = $('#contactSubject').val().trim();
+        const message = $('#contactMessage').val().trim();
+        
+        // Validate
+        if (!name || !email || !subject || !message) {
+            showNotification('Please fill in all fields', 'error');
+            return;
+        }
+        
+        if (!isValidEmail(email)) {
+            showNotification('Please enter a valid email address', 'error');
+            return;
+        }
+        
+        // Show loading
+        $btn.prop('disabled', true)
+            .html('<i class="fas fa-spinner fa-spin"></i> Sending...');
+        
+        // Simulate sending
+        setTimeout(function() {
+            // Hide form, show success
+            $('#contactForm').fadeOut(function() {
+                $('#formSuccess').fadeIn();
+            });
+            
+            // Reset button
+            $btn.prop('disabled', false)
+                .html('<i class="fas fa-paper-plane"></i> Send Message');
+            
+            // Clear form
+            $('#contactName, #contactEmail, #contactSubject, #contactMessage').val('');
+            
+            showNotification('Message sent successfully!', 'success');
+        }, 2000);
+    });
+}
+
+// ================================================
+// 12. NEWSLETTER SUBSCRIPTION (jQuery)
+// ================================================
+
+function initNewsletter() {
+    $('#subscribeBtn').on('click', function() {
+        const $btn = $(this);
+        const email = $('#newsletterEmail').val().trim();
+        
+        if (!email) {
+            showNotification('Please enter your email', 'error');
+            return;
+        }
+        
+        if (!isValidEmail(email)) {
+            showNotification('Please enter a valid email', 'error');
+            return;
+        }
+        
+        $btn.prop('disabled', true)
+            .html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        setTimeout(function() {
+            $('#newsletterEmail').val('');
+            $btn.prop('disabled', false)
+                .html('<i class="fas fa-envelope"></i> Subscribe');
+            showNotification('Successfully subscribed!', 'success');
+        }, 1500);
+    });
+}
+
+// ================================================
+// 13. CODE COPY BUTTONS
+// ================================================
+
+function initCodeCopy() {
+    $('.code-example').each(function() {
+        const $codeBlock = $(this);
+        const $copyBtn = $('<button class="copy-code-btn"><i class="fas fa-copy"></i> Copy</button>');
+        
+        $copyBtn.css({
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            color: 'white',
+            border: 'none',
+            padding: '0.5rem 1rem',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '0.85rem',
+            transition: 'all 0.3s ease'
+        });
+        
+        $codeBlock.css('position', 'relative').append($copyBtn);
+        
+        $copyBtn.on('click', function() {
+            const code = $codeBlock.find('code').text();
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(code).then(function() {
+                $copyBtn.html('<i class="fas fa-check"></i> Copied!')
+                       .css('background', '#10b981');
+                
+                setTimeout(function() {
+                    $copyBtn.html('<i class="fas fa-copy"></i> Copy')
+                           .css('background', 'rgba(255, 255, 255, 0.1)');
+                }, 2000);
+            });
+        });
+        
+        $copyBtn.hover(
+            function() {
+                if (!$(this).text().includes('Copied')) {
+                    $(this).css('background', 'rgba(255, 255, 255, 0.2)');
+                }
+            },
+            function() {
+                if (!$(this).text().includes('Copied')) {
+                    $(this).css('background', 'rgba(255, 255, 255, 0.1)');
+                }
+            }
+        );
+    });
+}
+
+// ================================================
+// 14. NOTIFICATION SYSTEM (jQuery)
+// ================================================
+
+function showNotification(message, type = 'success') {
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    const bgColor = type === 'success' ? '#10b981' : '#ef4444';
+    
+    const $notification = $(`
+        <div class="notification notification-${type}">
+            <i class="fas ${icon}"></i>
+            <span>${message}</span>
+        </div>
+    `);
+    
+    $notification.css({
+        position: 'fixed',
+        top: '100px',
+        right: '30px',
+        background: bgColor,
+        color: 'white',
+        padding: '1rem 1.5rem',
+        borderRadius: '10px',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+        zIndex: 10000,
+        fontWeight: '500',
+        opacity: 0
+    });
+    
+    $('body').append($notification);
+    
+    // Fade in
+    $notification.animate({ opacity: 1, right: '30px' }, 300);
+    
+    // Remove after 4 seconds
+    setTimeout(function() {
+        $notification.animate({ opacity: 0, right: '-300px' }, 300, function() {
+            $(this).remove();
+        });
+    }, 4000);
+}
+
+// ================================================
+// 15. UTILITY FUNCTIONS
+// ================================================
+
+function isInViewport($element) {
+    if (!$element.length) return false;
+    
+    const elementTop = $element.offset().top;
+    const elementBottom = elementTop + $element.outerHeight();
+    const viewportTop = $(window).scrollTop();
+    const viewportBottom = viewportTop + $(window).height();
+    
+    return elementBottom > viewportTop && elementTop < viewportBottom;
+}
+
+function isValidEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+}
+
+// ================================================
+// 16. KEYBOARD SHORTCUTS
+// ================================================
+
+$(document).on('keydown', function(e) {
+    // Press 'H' to go home
+    if ((e.key === 'h' || e.key === 'H') && !$(e.target).is('input, textarea')) {
+        $('html, body').animate({ scrollTop: $('#home').offset().top }, 800);
+    }
+    
+    // Press 'C' to go to contact
+    if ((e.key === 'c' || e.key === 'C') && !$(e.target).is('input, textarea')) {
+        $('html, body').animate({ scrollTop: $('#contact').offset().top }, 800);
+    }
+    
+    // Press 'Escape' to close mobile menu
+    if (e.key === 'Escape') {
+        $('#hamburger').removeClass('active');
+        $('#navMenu').removeClass('active');
+        $('body').css('overflow', 'auto');
+    }
+});
+
+// ================================================
+// 17. MOBILE TOUCH IMPROVEMENTS
+// ================================================
+
+// Improve touch scrolling on iOS
+$('body').css({
+    '-webkit-overflow-scrolling': 'touch',
+    'overflow-scrolling': 'touch'
+});
+
+// Prevent zoom on double tap (mobile)
+$('button, a, input, textarea').on('touchend', function(e) {
+    e.preventDefault();
+    $(this).trigger('click');
+});
+
+// ================================================
+// 18. LAZY LOAD IMAGES (jQuery)
+// ================================================
+
+$('img[data-src]').each(function() {
+    const $img = $(this);
+    const imgObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                $img.attr('src', $img.data('src'));
+                $img.removeAttr('data-src');
+                imgObserver.unobserve(entry.target);
+            }
+        });
+    });
+    
+    imgObserver.observe(this);
+});
+
+// ================================================
+// 19. CONSOLE WELCOME
+// ================================================
+
+console.log('%c Welcome to My Portfolio! ', 'background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-size: 20px; padding: 10px 20px; border-radius: 5px;');
+console.log('%c Built with Bootstrap, jQuery, AOS.js, Swiper.js', 'color: #667eea; font-size: 12px;');
+
+// ================================================
+// 20. PERFORMANCE MONITORING
+// ================================================
+
+$(window).on('load', function() {
+    const loadTime = performance.now();
+    console.log(`%c⚡ Page loaded in ${loadTime.toFixed(2)}ms`, 'color: #10b981; font-weight: bold;');
+    
+    // Refresh AOS after everything is loaded
+    AOS.refresh();
+});
 
 // ================================================
 // 1. INITIALIZE AOS (Animate On Scroll)
